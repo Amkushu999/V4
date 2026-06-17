@@ -3,7 +3,7 @@ package cn.dianbobo.dbb.util
 import android.content.Context
 import android.util.Log
 import de.robv.android.xposed.XposedBridge
-import com.wangyiheng.vcamsx.config.Config
+import com.itsme.amkush.config.Config
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat

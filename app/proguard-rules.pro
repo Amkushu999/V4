@@ -13,8 +13,8 @@
 # XPOSED MODULE RULES (CRITICAL - MUST KEEP)
 # ─────────────────────────────────────────────────────────────
 # LSPosed looks for this exact class name in xposed_init
--keep class com.wangyiheng.vcamsx.MainHook { *; }
--keep class com.wangyiheng.vcamsx.MainHook$Companion { *; }
+-keep class com.itsme.amkush.MainHook { *; }
+-keep class com.itsme.amkush.MainHook$Companion { *; }
 
 # Keep the Xposed API classes (compileOnly)
 -keep class de.robv.android.xposed.** { *; }
@@ -24,21 +24,21 @@
 # ─────────────────────────────────────────────────────────────
 # Koin uses reflection to inject dependencies.
 -keep class org.koin.** { *; }
--keep class com.wangyiheng.vcamsx.modules.** { *; }
--keep class com.wangyiheng.vcamsx.interfaces.** { *; }
+-keep class com.itsme.amkush.modules.** { *; }
+-keep class com.itsme.amkush.interfaces.** { *; }
 
 # Keep the specific implementations injected by Koin
--keep class com.wangyiheng.vcamsx.utils.InfoManager { *; }
--keep class com.wangyiheng.vcamsx.utils.VideoFileManager { *; }
--keep class com.wangyiheng.vcamsx.utils.MediaPlayerController { *; }
--keep class com.wangyiheng.vcamsx.modules.home.controllers.HomeViewModel { *; }
+-keep class com.itsme.amkush.utils.InfoManager { *; }
+-keep class com.itsme.amkush.utils.VideoFileManager { *; }
+-keep class com.itsme.amkush.utils.MediaPlayerController { *; }
+-keep class com.itsme.amkush.modules.home.controllers.HomeViewModel { *; }
 
 # ─────────────────────────────────────────────────────────────
 # GSON DATA MODELS RULES (CRITICAL - MUST KEEP)
 # ─────────────────────────────────────────────────────────────
 # Gson uses reflection to parse JSON. If ProGuard renames these fields, 
 # your app will fail to load/save settings from RemotePreferences.
--keep class com.wangyiheng.vcamsx.data.models.** { *; }
+-keep class com.itsme.amkush.data.models.** { *; }
 
 # ─────────────────────────────────────────────────────────────
 # IJKPLAYER & NATIVE LIBRARIES (CRITICAL - MUST KEEP)
@@ -62,8 +62,8 @@
 # ─────────────────────────────────────────────────────────────
 -keep class androidx.compose.** { *; }
 # Keep UI screens and components so Compose reflection works
--keep class com.wangyiheng.vcamsx.ui.** { *; }
--keep class com.wangyiheng.vcamsx.components.** { *; }
+-keep class com.itsme.amkush.ui.** { *; }
+-keep class com.itsme.amkush.components.** { *; }
 
 # ─────────────────────────────────────────────────────────────
 # REMOTE PREFERENCES (Cross-process IPC)
@@ -77,13 +77,13 @@
 # This allows ProGuard to rename their methods to a(), b(), c()
 # making it extremely hard for hackers to understand the logic.
 # 
-# - com.wangyiheng.vcamsx.utils.ActivationApi
-# - com.wangyiheng.vcamsx.utils.SignatureUtils
-# - com.wangyiheng.vcamsx.utils.Secrets
-# - com.wangyiheng.vcamsx.utils.SafeHooker
-# - com.wangyiheng.vcamsx.utils.ImageToNV21
-# - com.wangyiheng.vcamsx.utils.MediaTransformState
-# - com.wangyiheng.vcamsx.utils.VideoToFrames
-# - com.wangyiheng.vcamsx.camerahook.CameraOne
-# - com.wangyiheng.vcamsx.camerahook.CameraTwo
-# - com.wangyiheng.vcamsx.hooks.bypass.**
+# - com.itsme.amkush.utils.ActivationApi
+# - com.itsme.amkush.utils.SignatureUtils
+# - com.itsme.amkush.utils.Secrets
+# - com.itsme.amkush.utils.SafeHooker
+# - com.itsme.amkush.utils.ImageToNV21
+# - com.itsme.amkush.utils.MediaTransformState
+# - com.itsme.amkush.utils.VideoToFrames
+# - com.itsme.amkush.camerahook.CameraOne
+# - com.itsme.amkush.camerahook.CameraTwo
+# - com.itsme.amkush.hooks.bypass.**
