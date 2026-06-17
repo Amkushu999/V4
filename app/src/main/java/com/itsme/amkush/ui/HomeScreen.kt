@@ -35,6 +35,7 @@ import com.itsme.amkush.modules.home.controllers.HomeViewModel
 import com.itsme.amkush.utils.MediaTransformState
 import com.itsme.amkush.utils.PlaybackState
 import org.koin.compose.koinInject
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +51,7 @@ fun HomeScreen(onBackClick: () -> Unit) {
     }
     val videoPath = videoFileManager.getVideoPath()
 
-    // 🎥 Local Video Picker (No storage permission required for GetContent)
+    // 🎥 Local Video Picker (Safely runs out-of-process without storage permissions)
     val selectVideoLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -68,18 +69,29 @@ fun HomeScreen(onBackClick: () -> Unit) {
         }
     }
 
-    // 🖼️ Local Image Picker
+    // 🖼️ Local Image Picker (Copies data to internal storage to avoid SecurityExceptions later)
     val selectImageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let {
+        uri?.let { selectedUri ->
             try {
                 videoFileManager.deleteSavedVideo()
-                val prefs = context.getSharedPreferences("main_prefs", Context.MODE_PRIVATE)
-                prefs.edit().putString("image_uri", it.toString()).apply()
+                
+                // Read the chosen file streaming data instantly and save it locally inside our data sandboxed space
+                context.contentResolver.openInputStream(selectedUri)?.use { inputStream ->
+                    val internalImageFile = File(context.filesDir, "injected_image.jpg")
+                    internalImageFile.outputStream().use { outputStream ->
+                        inputStream.copyTo(outputStream)
+                    }
+                    
+                    val prefs = context.getSharedPreferences("main_prefs", Context.MODE_PRIVATE)
+                    prefs.edit().putString("image_uri", Uri.fromFile(internalImageFile).toString()).apply()
+                }
+
                 MediaTransformState.reset()
-                Toast.makeText(context, "Image Selected! Hook will inject this.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Image Saved! Hook will inject this.", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
+                e.printStackTrace()
                 Toast.makeText(context, "Image Save Failed", Toast.LENGTH_SHORT).show()
             }
         }
