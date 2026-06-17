@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -30,6 +31,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,18 +54,19 @@ fun TransformControlsScreen() {
     val isVideoSelected = imageUriStr == null
     
     var isPlaying by remember { mutableStateOf(PlaybackState.isPlaying) }
-    
     var previewBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
+    // Safely parse and decode internal image assets
     LaunchedEffect(imageUriStr) {
         if (imageUriStr != null) {
             withContext(Dispatchers.IO) {
                 try {
-                    val inputStream = context.contentResolver.openInputStream(Uri.parse(imageUriStr))
-                    val bmp = BitmapFactory.decodeStream(inputStream)
-                    inputStream?.close()
-                    previewBitmap = bmp
+                    context.contentResolver.openInputStream(Uri.parse(imageUriStr))?.use { inputStream ->
+                        val bmp = BitmapFactory.decodeStream(inputStream)
+                        previewBitmap = bmp
+                    }
                 } catch (e: Exception) {
+                    e.printStackTrace()
                     previewBitmap = null
                 }
             }
@@ -89,7 +92,7 @@ fun TransformControlsScreen() {
                         Icon(Icons.Default.Close, contentDescription = "Reset", tint = Color(0xFFFF2D7E))
                     }
                 },
-                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color(0xFF0A0A0F))
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF0A0A0F))
             )
         },
         containerColor = Color(0xFF0A0A0F)
@@ -103,6 +106,7 @@ fun TransformControlsScreen() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             
+            // 📺 Media Preview Canvas Container
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -116,7 +120,7 @@ fun TransformControlsScreen() {
                     contentAlignment = Alignment.Center
                 ) {
                     if (previewBitmap != null) {
-                        androidx.compose.foundation.Image(
+                        Image(
                             bitmap = previewBitmap!!.asImageBitmap(),
                             contentDescription = "Preview",
                             contentScale = ContentScale.Crop,
@@ -148,7 +152,8 @@ fun TransformControlsScreen() {
                             Text(
                                 "Adjusting controls here\napplies to target app", 
                                 color = Color.Gray, 
-                                fontSize = 12.sp
+                                fontSize = 12.sp,
+                                textAlign = TextAlign.Center
                             )
                         }
                     } else {
@@ -157,6 +162,7 @@ fun TransformControlsScreen() {
                 }
             }
 
+            // 🔍 Zoom Modification Station
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -198,6 +204,7 @@ fun TransformControlsScreen() {
                 }
             }
 
+            // 🎬 Playback Command Strip (Rendered for stream/video hook modes)
             if (isVideoSelected) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -233,6 +240,7 @@ fun TransformControlsScreen() {
                 }
             }
 
+            // 🕹️ Spring-loaded Pan/Move Offset Joystick Control
             Card(
                 modifier = Modifier.size(220.dp),
                 shape = CircleShape,
@@ -284,11 +292,11 @@ fun TransformControlsScreen() {
             }
 
             Text(
-                if (isVideoSelected) "Preview updates in real-time.\nUse Play/Pause to control target video."
-                else "Preview updates in real-time.\nImage injection active.",
+                text = if (isVideoSelected) "Preview updates in real-time.\nUse Play/Pause to control target video."
+                       else "Preview updates in real-time.\nImage injection active.",
                 color = Color(0xFF6B7280),
                 fontSize = 11.sp,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                textAlign = TextAlign.Center
             )
         }
     }
