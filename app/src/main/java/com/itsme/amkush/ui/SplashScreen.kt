@@ -20,7 +20,6 @@ import kotlinx.coroutines.delay
 @Composable
 fun SplashScreen(onSplashFinished: () -> Unit) {
 
-    // Start at 0, animate TO 1 so the tween actually plays
     var targetScale by remember { mutableStateOf(0f) }
     var targetAlpha by remember { mutableStateOf(0f) }
 
@@ -36,8 +35,8 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
     )
 
     LaunchedEffect(Unit) {
-        targetScale = 1f   // kicks off the scale animation
-        targetAlpha = 1f   // kicks off the fade animation
+        targetScale = 1f   // Kicks off the scale frame interpolation
+        targetAlpha = 1f   // Kicks off the fade alpha interpolation
         delay(2000)
         onSplashFinished()
     }
@@ -51,18 +50,17 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
         Box(
             modifier = Modifier
                 .size(140.dp)
+                .scale(scale)
+                .alpha(alpha)
                 .clip(RoundedCornerShape(32.dp))
-                .background(Color.White)
+                .background(Color(0xFF12141C)) // Sleek dark surface matching FaceGate dashboard aesthetic
                 .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_launcher_foreground),
                 contentDescription = "App Icon",
-                modifier = Modifier
-                    .fillMaxSize()
-                    .scale(scale)
-                    .alpha(alpha)
+                modifier = Modifier.fillMaxSize()
             )
         }
     }
