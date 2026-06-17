@@ -14,7 +14,7 @@ import com.itsme.amkush.navigation.ScreenTransition
 import com.itsme.amkush.navigation.rememberNavController
 import com.itsme.amkush.ui.ActivationScreen
 import com.itsme.amkush.ui.FaceGateScreen
-import com.itsme.amkush.ui.HomeScreen
+import com.itsme.amkush.ui.NavigationScreen
 import com.itsme.amkush.ui.SplashScreen
 import com.itsme.amkush.ui.theme.FaceGateTheme
 import com.itsme.amkush.utils.AntiTamperManager
@@ -58,15 +58,16 @@ class MainActivity : ComponentActivity() {
                                         },
                                         onHookSuccess = { 
                                             // Triggered when user is paid and taps "HOOK CAMERA"
-                                            // Slide FORWARD to Settings Screen
+                                            // Slide FORWARD into the Tabbed Dashboard Container
                                             navController.navigateTo(Screen.HOME, NavDirection.FORWARD) 
                                         }
                                     )
                                 }
                                 Screen.HOME -> {
-                                    HomeScreen(
+                                    // ⚡ Render the Multi-Tab host panel instead of hitting the raw screen layout directly
+                                    NavigationScreen(
                                         onBackClick = { 
-                                            // Slide BACKWARD to Target Selection (FaceGate)
+                                            // Slide BACKWARD to Target Selection layout (FaceGate)
                                             navController.goBack(Screen.FACE_GATE) 
                                         }
                                     )
