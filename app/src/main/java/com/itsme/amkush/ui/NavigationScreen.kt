@@ -15,7 +15,7 @@ import com.itsme.amkush.ui.theme.FaceGateTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NavigationScreen() {
+fun NavigationScreen(onBackClick: () -> Unit) {
     var currentScreen by remember { mutableStateOf("settings") }
     
     FaceGateTheme {
@@ -83,7 +83,7 @@ fun NavigationScreen() {
         ) { paddingValues ->
             Box(modifier = Modifier.padding(paddingValues)) {
                 when (currentScreen) {
-                    "settings" -> SettingsScreenContent()
+                    "settings" -> SettingsScreenContent(onBackClick = onBackClick)
                     "hideapp" -> HideAppScreen()
                     "spoofer" -> SpooferScreen()
                     "controls" -> TransformControlsScreen()
@@ -94,6 +94,6 @@ fun NavigationScreen() {
 }
 
 @Composable
-fun SettingsScreenContent() {
-    HomeScreen(onBackClick = {})
+fun SettingsScreenContent(onBackClick: () -> Unit) {
+    HomeScreen(onBackClick = onBackClick)
 }
