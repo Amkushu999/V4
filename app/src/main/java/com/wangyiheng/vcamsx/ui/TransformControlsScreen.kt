@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.PlayCircleFilled
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -132,7 +133,7 @@ fun TransformControlsScreen() {
                     } else if (isVideoSelected) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(
-                                Icons.Default.PlayCircle, 
+                                Icons.Default.PlayCircleFilled, 
                                 contentDescription = null, 
                                 tint = Color(0xFF00D4FF), 
                                 modifier = Modifier.size(64.dp)

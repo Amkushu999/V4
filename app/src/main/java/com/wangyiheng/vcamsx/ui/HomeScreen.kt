@@ -36,7 +36,7 @@ import com.wangyiheng.vcamsx.interfaces.IVideoFileManager
 import com.wangyiheng.vcamsx.modules.home.controllers.HomeViewModel
 import com.wangyiheng.vcamsx.utils.MediaTransformState
 import com.wangyiheng.vcamsx.utils.PlaybackState
-import org.koin.androidx.compose.koinInject
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

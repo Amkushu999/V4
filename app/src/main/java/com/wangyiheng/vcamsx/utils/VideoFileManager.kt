@@ -41,7 +41,7 @@ class VideoFileManager(private val context: Context) : IVideoFileManager {
      * 🆕 NEW: Deletes the saved video file from internal storage.
      * Used when the user switches from Video to Image injection.
      */
-    fun deleteSavedVideo() {
+    override fun deleteSavedVideo() {
         val path = getVideoPath()
         val file = File(path)
         if (file.exists()) {
