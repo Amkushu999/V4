@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Default scope for Xposed module -->
+    <!-- These apps will be hooked by default. Users can add more in LSPosed. -->
+    <string-array name="xposed_scope">
+        <!-- Social Media Apps -->
+        <item>com.whatsapp</item>
+        <item>com.instagram.android</item>
+        <item>com.snapchat.android</item>
+        <item>com.facebook.katana</item>
+        <item>com.facebook.orca</item>
+        <item>org.telegram.messenger</item>
+        <item>org.thunderdog.challegram</item>
+        <item>com.viber.voip</item>
+        <item>com.discord</item>
+        
+        <!-- Dating Apps -->
+        <item>com.tinder</item>
+        <item>com.bumble.app</item>
+        <item>com.hinge.app</item>
+        
+        <!-- Video Call Apps -->
+        <item>com.zoom.videomeetings</item>
+        <item>us.zoom.zrc</item>
+        <item>com.microsoft.teams</item>
+        <item>com.skype.raider</item>
+        <item>com.google.android.talk</item>
+        
+        <!-- Camera Apps -->
+        <item>com.google.android.GoogleCamera</item>
+        <item>com.sec.android.app.camera</item>
+        <item>com.oneplus.camera</item>
+        <item>com.miui.camera</item>
+        
+        <!-- Messaging Apps -->
+        <item>com.google.android.apps.messaging</item>
+        <item>com.samsung.android.messaging</item>
+        
+        <!-- Other Popular Apps with Camera -->
+        <item>com.ubercab</item>
+        <item>com.lyft.android</item>
+        <item>com.grabtaxi.passenger</item>
+    </string-array>
+</resources>
