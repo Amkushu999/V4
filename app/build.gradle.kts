@@ -8,11 +8,11 @@ kotlin {
 }
 
 android {
-    namespace = "com.wangyiheng.vcamsx"
+    namespace = "com.itsme.amkush"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.wangyiheng.vcamsx"
+        applicationId = "com.itsme.amkush"
         minSdk = 24
         //noinspection EditedTargetSdkVersion
         targetSdk = 34

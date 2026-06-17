@@ -68,13 +68,13 @@
         <!-- Content Providers for Xposed Hook Data Sharing -->
         <provider
             android:name=".utils.VideoProvider"
-            android:authorities="com.wangyiheng.vcamsx.videoprovider"
+            android:authorities="com.itsme.amkush.videoprovider"
             android:exported="true"
             android:grantUriPermissions="true" />
 
         <provider
             android:name=".utils.MultiprocessSharedPreferences"
-            android:authorities="com.wangyiheng.vcamsx.preferences"
+            android:authorities="com.itsme.amkush.preferences"
             android:exported="true" />
 
     </application>
