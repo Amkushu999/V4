@@ -23,13 +23,29 @@ object HLog {
     
     private fun log(level: LogLevel, tag: String, msg: String) {
         if (!Config.DEBUG_MODE && level == LogLevel.DEBUG) return
+        
         val prefix = when (level) {
             LogLevel.DEBUG -> "[D]"
             LogLevel.INFO -> "[I]"
             LogLevel.WARN -> "[W]"
             LogLevel.ERROR -> "[E]"
         }
-        XposedBridge.log("$prefix $tag: $msg")
+        
+        val formattedMsg = "$prefix $tag: $msg"
+        
+        try {
+            // 🛡️ Try Xposed logging first (works when injected into target system/apps)
+            XposedBridge.log(formattedMsg)
+        } catch (e: NoClassDefFoundError) {
+            // 💡 Fallback: Xposed is missing because this is running inside your Manager UI App process!
+            // Route the messages safely to standard Android Logcat instead of crashing.
+            when (level) {
+                LogLevel.DEBUG -> Log.d(tag, msg)
+                LogLevel.INFO -> Log.i(tag, msg)
+                LogLevel.WARN -> Log.w(tag, msg)
+                LogLevel.ERROR -> Log.e(tag, msg)
+            }
+        }
     }
     
     fun localeLog(context: Context, msg: String) {
