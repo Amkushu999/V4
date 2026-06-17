@@ -2,30 +2,26 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- 🛡️ CRITICAL FOR ANDROID 11+ (API 30): Allows the app to see installed apps for the Picker/HideApp -->
     <queries>
         <intent>
             <action android:name="android.intent.action.MAIN" />
         </intent>
     </queries>
 
-    <!-- Network & System Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     
-    <!-- Storage Permissions (Handles Android 12 and below) -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" 
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
         android:maxSdkVersion="29" />
         
-    <!-- 🛡️ CRITICAL FOR ANDROID 13+ (API 33): New granular media permissions -->
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
     <application
-        android:name=".MyApplication"
+        android:name="com.itsme.amkush.MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -35,10 +31,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FACEGATE"
         android:allowNativeHeapPointerTagging="false"
+        android:requestLegacyExternalStorage="true"
         tools:targetApi="34">
         
         <activity
-            android:name=".MainActivity"
+            android:name="com.itsme.amkush.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.FACEGATE">
@@ -48,7 +45,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Xposed Module Metadata -->
         <meta-data
             android:name="xposedmodule"
             android:value="true" />
@@ -59,21 +55,18 @@
             android:name="xposedminversion"
             android:value="93" />
         
-        <!-- ✅ ADDED BACK: Default scope for common camera apps -->
-        <!-- Users can still manually add more apps in LSPosed manager -->
         <meta-data
             android:name="xposedscope"
             android:resource="@array/xposed_scope" />
             
-        <!-- Content Providers for Xposed Hook Data Sharing -->
         <provider
-            android:name=".utils.VideoProvider"
+            android:name="com.itsme.amkush.utils.VideoProvider"
             android:authorities="com.itsme.amkush.videoprovider"
             android:exported="true"
             android:grantUriPermissions="true" />
 
         <provider
-            android:name=".utils.MultiprocessSharedPreferences"
+            android:name="com.itsme.amkush.utils.MultiprocessSharedPreferences"
             android:authorities="com.itsme.amkush.preferences"
             android:exported="true" />
 
