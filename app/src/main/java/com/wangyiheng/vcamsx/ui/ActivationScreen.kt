@@ -68,7 +68,7 @@ sealed class ActivationState {
     data class Error(val message: String) : ActivationState()
 }
 
-@OptIn(ExperimentalAnimationApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ActivationScreen(onActivated: () -> Unit = {}) {
     val context = LocalContext.current
@@ -250,14 +250,12 @@ fun ActivationScreen(onActivated: () -> Unit = {}) {
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(10.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            textColor            = TextPrimary,
+                            cursorColor          = CyanAccent,
                             focusedBorderColor   = CyanAccent.copy(alpha = 0.7f),
                             unfocusedBorderColor = fieldBorder,
-                            focusedContainerColor   = Color(0xFF050D18),
-                            unfocusedContainerColor = Color(0xFF050D18),
-                            cursorColor         = CyanAccent,
-                            focusedTextColor    = TextPrimary,
-                            unfocusedTextColor  = TextPrimary
+                            containerColor       = Color(0xFF050D18)
                         ),
                         textStyle = androidx.compose.ui.text.TextStyle(
                             fontFamily  = FontFamily.Monospace,
@@ -359,7 +357,7 @@ fun ActivationScreen(onActivated: () -> Unit = {}) {
                         ) {
                             AnimatedContent(
                                 targetState = isVerifying,
-                                transitionSpec = { fadeIn(tween(250)) togetherWith fadeOut(tween(200)) },
+                                transitionSpec = { fadeIn(tween(250)) with fadeOut(tween(200)) },
                                 label = "btnContent"
                             ) { verifying ->
                                 if (verifying) {

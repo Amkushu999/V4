@@ -19,7 +19,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import com.wangyiheng.vcamsx.interfaces.IVideoPlayer
 import com.wangyiheng.vcamsx.modules.home.controllers.HomeViewModel
-import org.koin.compose.koinInject
+import org.koin.androidx.compose.koinInject
 
 @Composable
 fun LivePlayerDialog(homeViewModel: HomeViewModel, context: Context) {

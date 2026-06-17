@@ -52,7 +52,7 @@ fun SpooferScreen() {
         topBar = {
             TopAppBar(
                 title = { Text("Device Spoofer", color = Color(0xFF00D4FF), fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.topAppBarColors(
+                colors = TopAppBarDefaults.smallTopAppBarColors(
                     containerColor = Color(0xFF0A0A0F)
                 )
             )
@@ -206,6 +206,7 @@ fun InfoRow(label: String, value: String) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SpoofField(
     label: String,
@@ -228,13 +229,12 @@ fun SpoofField(
                 .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier),
             shape = RoundedCornerShape(12.dp),
             readOnly = readOnly,
-            colors = OutlinedTextFieldDefaults.colors(
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                textColor = Color.White,
+                disabledTextColor = Color.White,
                 focusedBorderColor = Color(0xFF00D4FF),
                 unfocusedBorderColor = Color(0xFF1E2130),
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                disabledBorderColor = Color(0xFF1E2130),
-                disabledTextColor = Color.White
+                disabledBorderColor = Color(0xFF1E2130)
             ),
             singleLine = true
         )

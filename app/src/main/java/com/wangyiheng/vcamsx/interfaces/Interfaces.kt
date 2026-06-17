@@ -31,4 +31,5 @@ interface IVideoFileManager {
     fun copyVideoToAppDir(videoUri: Uri): File
     fun getVideoPath(): String
     fun videoExists(): Boolean
+    fun deleteSavedVideo()
 }

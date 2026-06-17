@@ -87,7 +87,7 @@ object RootBypassHook {
                 }
             })
         } else {
-            SafeHooker.hookMethod(lpparam, "android.app.ApplicationPackageManager", "getPackageInfo", String::class.java, Int::class.javaPrimitiveType, callback = object : XC_MethodHook() {
+            SafeHooker.hookMethod(lpparam, "android.app.ApplicationPackageManager", "getPackageInfo", String::class.java, Int::class.javaPrimitiveType!!, callback = object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
                     val packageName = param.args[0] as? String ?: return
                     if (packageName in rootApps) {

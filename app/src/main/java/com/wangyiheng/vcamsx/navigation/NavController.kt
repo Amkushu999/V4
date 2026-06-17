@@ -40,7 +40,7 @@ fun <T> ScreenTransition(
                     (slideInHorizontally(
                         animationSpec = tween(400, easing = FastOutSlowInEasing),
                         initialOffsetX = { it }
-                    ) + fadeIn(tween(300))) togetherWith (
+                    ) + fadeIn(tween(300))) with (
                         slideOutHorizontally(
                             animationSpec = tween(400, easing = FastOutSlowInEasing),
                             targetOffsetX  = { -it / 3 }
@@ -50,7 +50,7 @@ fun <T> ScreenTransition(
                     (slideInHorizontally(
                         animationSpec = tween(400, easing = FastOutSlowInEasing),
                         initialOffsetX = { -it }
-                    ) + fadeIn(tween(300))) togetherWith (
+                    ) + fadeIn(tween(300))) with (
                         slideOutHorizontally(
                             animationSpec = tween(400, easing = FastOutSlowInEasing),
                             targetOffsetX  = { it }

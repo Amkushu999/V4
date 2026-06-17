@@ -55,20 +55,17 @@ android {
 dependencies {
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    // Needed for viewModel() in Compose
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
     implementation("androidx.activity:activity-compose:1.8.0")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
-    
-    // ❌ REMOVED: Android-PickerView (caused build errors)
-    // implementation ("com.contrarywind:Android-PickerView:latest.release")
 
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
-
-    // ❌ REMOVED: ExoPlayer dependencies (Unused, app uses ijkplayer)
-    // implementation("androidx.media3:media3-exoplayer:1.2.0")
-    // implementation("androidx.media3:media3-ui:1.2.0")
+    // All extended icons (FlashOn, Key, Tag, SmartToy, Fingerprint, CameraAlt, etc.)
+    implementation("androidx.compose.material:material-icons-extended")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
@@ -78,11 +75,12 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-    implementation ("io.insert-koin:koin-core:3.2.2")
-    implementation ("io.insert-koin:koin-android:3.2.2")
-    implementation ("io.insert-koin:koin-androidx-compose:3.2.2")
+    // Koin 3.4.3 — provides koinInject at org.koin.androidx.compose
+    implementation("io.insert-koin:koin-core:3.4.3")
+    implementation("io.insert-koin:koin-android:3.4.3")
+    implementation("io.insert-koin:koin-androidx-compose:3.4.3")
 
     compileOnly("de.robv.android.xposed:api:82")
-    implementation ("com.crossbowffs.remotepreferences:remotepreferences:0.8")
-    implementation ("com.google.code.gson:gson:2.8.8")
+    implementation("com.crossbowffs.remotepreferences:remotepreferences:0.8")
+    implementation("com.google.code.gson:gson:2.8.8")
 }

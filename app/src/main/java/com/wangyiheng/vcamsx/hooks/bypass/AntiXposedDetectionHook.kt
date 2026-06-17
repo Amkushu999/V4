@@ -25,7 +25,7 @@ object AntiXposedDetectionHook {
             "de.robv.android.xposed.IXposedHookZygoteInit"
         )
 
-        SafeHooker.hookMethod(lpparam, "java.lang.Class", "forName", String::class.java, object : XC_MethodHook() {
+        SafeHooker.hookMethod(lpparam, "java.lang.Class", "forName", String::class.java, callback = object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
                 val className = param.args[0] as? String ?: return
                 if (xposedClasses.any { className.contains(it) }) {
@@ -34,7 +34,7 @@ object AntiXposedDetectionHook {
             }
         })
 
-        SafeHooker.hookMethod(lpparam, "java.lang.ClassLoader", "loadClass", String::class.java, object : XC_MethodHook() {
+        SafeHooker.hookMethod(lpparam, "java.lang.ClassLoader", "loadClass", String::class.java, callback = object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
                 val className = param.args[0] as? String ?: return
                 if (xposedClasses.any { className.contains(it) }) {
@@ -55,7 +55,7 @@ object AntiXposedDetectionHook {
             "com.github.xposed"
         )
 
-        SafeHooker.hookMethod(lpparam, "android.app.ApplicationPackageManager", "getPackageInfo", String::class.java, Int::class.javaPrimitiveType, object : XC_MethodHook() {
+        SafeHooker.hookMethod(lpparam, "android.app.ApplicationPackageManager", "getPackageInfo", String::class.java, Int::class.javaPrimitiveType!!, callback = object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
                 val packageName = param.args[0] as? String ?: return
                 if (xposedPackages.any { packageName.contains(it) }) {

@@ -54,7 +54,7 @@ fun HideAppScreen() {
         topBar = {
             TopAppBar(
                 title = { Text("Hide Apps", color = Color(0xFF00D4FF), fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.topAppBarColors(
+                colors = TopAppBarDefaults.smallTopAppBarColors(
                     containerColor = Color(0xFF0A0A0F)
                 )
             )
@@ -75,11 +75,10 @@ fun HideAppScreen() {
                     .fillMaxWidth()
                     .padding(16.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    textColor = Color.White,
                     focusedBorderColor = Color(0xFF00D4FF),
-                    unfocusedBorderColor = Color(0xFF1E2130),
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White
+                    unfocusedBorderColor = Color(0xFF1E2130)
                 ),
                 singleLine = true
             )

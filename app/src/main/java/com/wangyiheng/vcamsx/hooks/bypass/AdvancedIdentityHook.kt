@@ -65,7 +65,7 @@ object AdvancedIdentityHook {
     }
 
     private fun spoofBattery(lpparam: XC_LoadPackage.LoadPackageParam) {
-        SafeHooker.hookMethod(lpparam, "android.os.BatteryManager", "getIntProperty", Int::class.javaPrimitiveType, callback = object : XC_MethodHook() {
+        SafeHooker.hookMethod(lpparam, "android.os.BatteryManager", "getIntProperty", Int::class.javaPrimitiveType!!, callback = object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
                 val id = param.args[0] as Int
                 if (id == 4) {
@@ -109,8 +109,8 @@ object AdvancedIdentityHook {
         try {
             val sensorEventListenerClass = Class.forName("android.hardware.SensorEventListener")
             SafeHooker.hookMethod(lpparam, "android.hardware.SensorManager", "registerListener",
-                sensorEventListenerClass, Class.forName("android.hardware.Sensor"), Int::class.javaPrimitiveType,
-                object : XC_MethodHook() {
+                sensorEventListenerClass, Class.forName("android.hardware.Sensor"), Int::class.javaPrimitiveType!!,
+                callback = object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         val originalListener = param.args[0]
                         val proxy = java.lang.reflect.Proxy.newProxyInstance(
@@ -135,7 +135,7 @@ object AdvancedIdentityHook {
     }
 
     private fun injectAmbientMicrophoneNoise(lpparam: XC_LoadPackage.LoadPackageParam) {
-        SafeHooker.hookMethod(lpparam, "android.media.AudioRecord", "read", ByteArray::class.java, Int::class.javaPrimitiveType, Int::class.javaPrimitiveType, object : XC_MethodHook() {
+        SafeHooker.hookMethod(lpparam, "android.media.AudioRecord", "read", ByteArray::class.java, Int::class.javaPrimitiveType!!, Int::class.javaPrimitiveType!!, callback = object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
                 val buffer = param.args[0] as? ByteArray ?: return
                 val read = param.result as? Int ?: return
@@ -146,7 +146,7 @@ object AdvancedIdentityHook {
                 }
             }
         })
-        SafeHooker.hookMethod(lpparam, "android.media.AudioRecord", "read", ShortArray::class.java, Int::class.javaPrimitiveType, Int::class.javaPrimitiveType, object : XC_MethodHook() {
+        SafeHooker.hookMethod(lpparam, "android.media.AudioRecord", "read", ShortArray::class.java, Int::class.javaPrimitiveType!!, Int::class.javaPrimitiveType!!, callback = object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
                 val buffer = param.args[0] as? ShortArray ?: return
                 val read = param.result as? Int ?: return

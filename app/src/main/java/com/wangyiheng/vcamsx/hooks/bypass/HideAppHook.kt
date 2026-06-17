@@ -39,8 +39,8 @@ object HideAppHook {
             lpparam,
             "android.app.ApplicationPackageManager",
             "getInstalledApplications",
-            Int::class.javaPrimitiveType,
-            object : XC_MethodHook() {
+            Int::class.javaPrimitiveType!!,
+            callback = object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam) {
                     val hiddenApps = getHiddenApps(context)
                     if (hiddenApps.isEmpty()) return
@@ -57,8 +57,8 @@ object HideAppHook {
             lpparam,
             "android.app.ApplicationPackageManager",
             "getInstalledPackages",
-            Int::class.javaPrimitiveType,
-            object : XC_MethodHook() {
+            Int::class.javaPrimitiveType!!,
+            callback = object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam) {
                     val hiddenApps = getHiddenApps(context)
                     if (hiddenApps.isEmpty()) return

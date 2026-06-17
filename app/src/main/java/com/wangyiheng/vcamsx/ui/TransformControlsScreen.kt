@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -87,7 +88,7 @@ fun TransformControlsScreen() {
                         Icon(Icons.Default.Close, contentDescription = "Reset", tint = Color(0xFFFF2D7E))
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF0A0A0F))
+                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color(0xFF0A0A0F))
             )
         },
         containerColor = Color(0xFF0A0A0F)
@@ -235,7 +236,7 @@ fun TransformControlsScreen() {
                 modifier = Modifier.size(220.dp),
                 shape = CircleShape,
                 colors = CardDefaults.cardColors(containerColor = Color(0xFF12141C)),
-                border = CardDefaults.outlinedCardBorder().copy(width = 2.dp, color = Color(0xFF1E2130))
+                border = BorderStroke(2.dp, Color(0xFF1E2130))
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize().padding(16.dp),

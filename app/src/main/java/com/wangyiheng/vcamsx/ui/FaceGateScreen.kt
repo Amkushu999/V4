@@ -53,7 +53,7 @@ private val BorderColor   = Color(0xFF1E2130)
 private val PurpleRing    = Color(0xFF7C3AED)
 private val GreenActive   = Color(0xFF00FF7F)
 
-@OptIn(ExperimentalAnimationApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun FaceGateScreen(
     onShowActivation: () -> Unit,
@@ -150,7 +150,7 @@ fun FaceGateScreen(
 
             AnimatedContent(
                 targetState = Triple(selectedTarget != null, hookingState, hookedState),
-                transitionSpec = { fadeIn(tween(300)) togetherWith fadeOut(tween(200)) }, label = "bottomBtn"
+                transitionSpec = { fadeIn(tween(300)) with fadeOut(tween(200)) }, label = "bottomBtn"
             ) { (hasTarget, isHooking, isHooked) ->
                 when {
                     isHooking -> {
@@ -234,6 +234,7 @@ fun FaceGateScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppPickerSheet(onDismiss: () -> Unit, onAppSelected: (AppInfo) -> Unit) {
     val context = LocalContext.current
@@ -262,7 +263,7 @@ fun AppPickerSheet(onDismiss: () -> Unit, onAppSelected: (AppInfo) -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(text = "SELECT TARGET APP", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp, letterSpacing = 2.sp, modifier = Modifier.padding(horizontal = 20.dp))
             Spacer(modifier = Modifier.height(14.dp))
-            OutlinedTextField(value = searchQuery, onValueChange = { searchQuery = it }, placeholder = { Text("Search apps...", color = TextSecondary, fontSize = 14.sp) }, leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = CyanAccent) }, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), shape = RoundedCornerShape(14.dp), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = CyanAccent.copy(alpha = 0.6f), unfocusedBorderColor = BorderColor, focusedContainerColor = CardDarker, unfocusedContainerColor = CardDarker, cursorColor = CyanAccent, focusedTextColor = TextPrimary, unfocusedTextColor = TextPrimary), singleLine = true, keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search))
+            OutlinedTextField(value = searchQuery, onValueChange = { searchQuery = it }, placeholder = { Text("Search apps...", color = TextSecondary, fontSize = 14.sp) }, leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = CyanAccent) }, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), shape = RoundedCornerShape(14.dp), colors = TextFieldDefaults.outlinedTextFieldColors(textColor = TextPrimary, cursorColor = CyanAccent, focusedBorderColor = CyanAccent.copy(alpha = 0.6f), unfocusedBorderColor = BorderColor, containerColor = CardDarker), singleLine = true, keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search))
             Spacer(modifier = Modifier.height(6.dp))
             if (!isLoading) Text(text = "${filtered.size} apps found", color = TextSecondary, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp))
             if (isLoading) Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = CyanAccent, strokeWidth = 2.dp, modifier = Modifier.size(32.dp)) } 
