@@ -1,9 +1,7 @@
 package com.itsme.amkush.ui
 
-import android.Manifest
 import android.content.Context
 import android.net.Uri
-import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -52,6 +50,7 @@ fun HomeScreen(onBackClick: () -> Unit) {
     }
     val videoPath = videoFileManager.getVideoPath()
 
+    // 🎥 Local Video Picker (No storage permission required for GetContent)
     val selectVideoLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -69,15 +68,7 @@ fun HomeScreen(onBackClick: () -> Unit) {
         }
     }
 
-    val requestPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { isGranted ->
-            if (isGranted) selectVideoLauncher.launch("video/*")
-            else if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) Toast.makeText(context, "Permission Required", Toast.LENGTH_SHORT).show()
-            else selectVideoLauncher.launch("video/*")
-        }
-    )
-
+    // 🖼️ Local Image Picker
     val selectImageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -105,7 +96,7 @@ fun HomeScreen(onBackClick: () -> Unit) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back", tint = Color(0xFF00D4FF))
                     }
                 },
-                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color(0xFF0A0A0F))
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF0A0A0F))
             )
         },
         containerColor = Color(0xFF0A0A0F)
@@ -136,7 +127,8 @@ fun HomeScreen(onBackClick: () -> Unit) {
                         }
                     ),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
-                        textColor = Color.White,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
                         cursorColor = Color(0xFF00D4FF),
                         focusedBorderColor = Color(0xFF00D4FF),
                         unfocusedBorderColor = Color(0xFF1E2130)
@@ -146,7 +138,7 @@ fun HomeScreen(onBackClick: () -> Unit) {
                 Spacer(modifier = Modifier.height(8.dp))
 
                 NeonButton(text = "Select Local Video", borderColor = Color(0xFF00D4FF), textColor = Color(0xFF00D4FF)) {
-                    requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    selectVideoLauncher.launch("video/*")
                 }
 
                 NeonButton(text = "Preview Local Video", borderColor = Color(0xFFFF2D7E), textColor = Color(0xFFFF2D7E)) {
