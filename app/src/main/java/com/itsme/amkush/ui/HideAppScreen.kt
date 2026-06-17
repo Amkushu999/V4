@@ -3,6 +3,7 @@ package com.itsme.amkush.ui
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,7 +31,7 @@ data class HiddenApp(
     val packageName: String,
     val appName: String,
     val icon: android.graphics.drawable.Drawable?,
-    var isHidden: Boolean = false
+    val isHidden: Boolean = false
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,9 +55,7 @@ fun HideAppScreen() {
         topBar = {
             TopAppBar(
                 title = { Text("Hide Apps", color = Color(0xFF00D4FF), fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = Color(0xFF0A0A0F)
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF0A0A0F))
             )
         },
         containerColor = Color(0xFF0A0A0F)
@@ -75,8 +74,9 @@ fun HideAppScreen() {
                     .fillMaxWidth()
                     .padding(16.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    textColor = Color.White,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
                     focusedBorderColor = Color(0xFF00D4FF),
                     unfocusedBorderColor = Color(0xFF1E2130)
                 ),
@@ -92,9 +92,13 @@ fun HideAppScreen() {
                     AppHideItem(
                         app = app,
                         onToggleHide = {
+                            val targetState = !app.isHidden
+                            // Update core underlying immutable array to safely force Compose frame updates
+                            apps = apps.map { 
+                                if (it.packageName == app.packageName) it.copy(isHidden = targetState) else it 
+                            }
                             scope.launch {
-                                app.isHidden = !app.isHidden
-                                updateHiddenAppsList(context, app.packageName, app.isHidden)
+                                updateHiddenAppsList(context, app.packageName, targetState)
                             }
                         }
                     )
@@ -106,14 +110,10 @@ fun HideAppScreen() {
 
 @Composable
 fun AppHideItem(app: HiddenApp, onToggleHide: () -> Unit) {
-    var isChecked by remember { mutableStateOf(app.isHidden) }
-    
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF12141C)
-        )
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF12141C))
     ) {
         Row(
             modifier = Modifier
@@ -122,7 +122,7 @@ fun AppHideItem(app: HiddenApp, onToggleHide: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (app.icon != null) {
-                androidx.compose.foundation.Image(
+                Image(
                     bitmap = app.icon.toBitmap().asImageBitmap(),
                     contentDescription = null,
                     modifier = Modifier
@@ -142,9 +142,8 @@ fun AppHideItem(app: HiddenApp, onToggleHide: () -> Unit) {
             )
             
             Checkbox(
-                checked = isChecked,
+                checked = app.isHidden,
                 onCheckedChange = { 
-                    isChecked = it
                     onToggleHide()
                 },
                 colors = CheckboxDefaults.colors(
