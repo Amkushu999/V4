@@ -1,6 +1,7 @@
 package com.itsme.amkush.ui
 
 import android.os.Build
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -26,12 +27,18 @@ fun SpooferScreen() {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     
-    var currentBrand by remember { mutableStateOf(Build.BRAND) }
-    var currentManufacturer by remember { mutableStateOf(Build.MANUFACTURER) }
-    var currentModel by remember { mutableStateOf(Build.MODEL) }
-    var currentAndroidVersion by remember { mutableStateOf(Build.VERSION.RELEASE) }
-    var currentBuildId by remember { mutableStateOf(Build.ID) }
-    var currentSecurityPatch by remember { mutableStateOf(Build.VERSION.SECURITY_PATCH) }
+    val currentBrand by remember { mutableStateOf(Build.BRAND) }
+    val currentManufacturer by remember { mutableStateOf(Build.MANUFACTURER) }
+    val currentModel by remember { mutableStateOf(Build.MODEL) }
+    val currentAndroidVersion by remember { mutableStateOf(Build.VERSION.RELEASE) }
+    val currentBuildId by remember { mutableStateOf(Build.ID) }
+    
+    // Fallback safe access for target Android API level field parsing
+    val currentSecurityPatch by remember { 
+        mutableStateOf(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) Build.VERSION.SECURITY_PATCH else "N/A"
+        ) 
+    }
     
     var spoofBrand by remember { mutableStateOf("") }
     var spoofManufacturer by remember { mutableStateOf("") }
@@ -52,9 +59,7 @@ fun SpooferScreen() {
         topBar = {
             TopAppBar(
                 title = { Text("Device Spoofer", color = Color(0xFF00D4FF), fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = Color(0xFF0A0A0F)
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF0A0A0F))
             )
         },
         containerColor = Color(0xFF0A0A0F)
@@ -70,16 +75,14 @@ fun SpooferScreen() {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFF12141C)
-                )
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF12141C))
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text("CURRENT DEVICE", color = Color(0xFF00D4FF), fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                    Divider(color = Color(0xFF1E2130))
+                    HorizontalDivider(color = Color(0xFF1E2130), thickness = 1.dp)
                     InfoRow("Model", currentModel)
                     InfoRow("Brand", currentBrand)
                     InfoRow("Manufacturer", currentManufacturer)
@@ -163,13 +166,13 @@ fun SpooferScreen() {
                 shape = RoundedCornerShape(12.dp),
                 enabled = allFieldsFilled,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (allFieldsFilled) Color(0xFF00D4FF) else Color(0xFF1E2130),
+                    containerColor = Color(0xFF00D4FF),
                     disabledContainerColor = Color(0xFF1E2130)
                 )
             ) {
-                Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(20.dp))
+                Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(20.dp), tint = if (allFieldsFilled) Color.Black else Color.Gray)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("APPLY SPOOF", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text("APPLY SPOOF", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = if (allFieldsFilled) Color.Black else Color.Gray)
             }
         }
     }
@@ -206,7 +209,6 @@ fun InfoRow(label: String, value: String) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SpoofField(
     label: String,
@@ -219,25 +221,34 @@ fun SpoofField(
 ) {
     Column {
         Text(label, color = Color(0xFF6B7280), fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
-        OutlinedTextField(
-            value = value,
-            onValueChange = { onValueChange?.invoke(it) },
-            placeholder = { Text(placeholder, color = Color.Gray) },
-            leadingIcon = { Icon(icon, contentDescription = null, tint = Color(0xFF00D4FF)) },
+        
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier),
-            shape = RoundedCornerShape(12.dp),
-            readOnly = readOnly,
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                textColor = Color.White,
-                disabledTextColor = Color.White,
-                focusedBorderColor = Color(0xFF00D4FF),
-                unfocusedBorderColor = Color(0xFF1E2130),
-                disabledBorderColor = Color(0xFF1E2130)
-            ),
-            singleLine = true
-        )
+                .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
+        ) {
+            OutlinedTextField(
+                value = value,
+                onValueChange = { onValueChange?.invoke(it) },
+                placeholder = { Text(placeholder, color = Color.Gray) },
+                leadingIcon = { Icon(icon, contentDescription = null, tint = Color(0xFF00D4FF)) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                readOnly = readOnly,
+                enabled = onClick == null, // Disables text input focus routing when relying on window click actions
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    disabledTextColor = Color.White,
+                    focusedBorderColor = Color(0xFF00D4FF),
+                    unfocusedBorderColor = Color(0xFF1E2130),
+                    disabledBorderColor = Color(0xFF1E2130),
+                    disabledLeadingIconColor = Color(0xFF00D4FF),
+                    disabledPlaceholderColor = Color.Gray
+                ),
+                singleLine = true
+            )
+        }
     }
 }
 
@@ -251,9 +262,9 @@ fun BrandSelectionDialog(onBrandSelected: (String) -> Unit, onDismiss: () -> Uni
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("SELECT BRAND", color = Color.White) },
+        title = { Text("SELECT BRAND", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp) },
         text = {
-            Column {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 brands.forEach { brand ->
                     Text(
                         text = brand,
@@ -261,7 +272,7 @@ fun BrandSelectionDialog(onBrandSelected: (String) -> Unit, onDismiss: () -> Uni
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { onBrandSelected(brand) }
-                            .padding(12.dp)
+                            .padding(14.dp)
                     )
                 }
             }
@@ -277,17 +288,17 @@ fun AndroidVersionDialog(onVersionSelected: (String) -> Unit, onDismiss: () -> U
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("SELECT ANDROID VERSION", color = Color.White) },
+        title = { Text("SELECT ANDROID VERSION", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp) },
         text = {
             Column {
                 versions.forEach { version ->
                     Text(
-                        text = version,
+                        text = "Android $version",
                         color = Color.White,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { onVersionSelected(version) }
-                            .padding(12.dp)
+                            .padding(14.dp)
                     )
                 }
             }
