@@ -250,12 +250,14 @@ fun ActivationScreen(onActivated: () -> Unit = {}) {
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(10.dp),
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            textColor            = TextPrimary,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor     = TextPrimary,
+                            unfocusedTextColor   = TextPrimary,
                             cursorColor          = CyanAccent,
                             focusedBorderColor   = CyanAccent.copy(alpha = 0.7f),
                             unfocusedBorderColor = fieldBorder,
-                            containerColor       = Color(0xFF050D18)
+                            focusedContainerColor   = Color(0xFF050D18),
+                            unfocusedContainerColor = Color(0xFF050D18)
                         ),
                         textStyle = androidx.compose.ui.text.TextStyle(
                             fontFamily  = FontFamily.Monospace,

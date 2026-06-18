@@ -138,7 +138,7 @@ fun HomeScreen(onBackClick: () -> Unit) {
                             focusManager.clearFocus()
                         }
                     ),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                    colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
                         cursorColor = Color(0xFF00D4FF),
