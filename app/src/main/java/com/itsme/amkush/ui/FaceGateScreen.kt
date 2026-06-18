@@ -99,7 +99,7 @@ fun FaceGateScreen(
                     Text(text = "FACEGATE", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
                     Text(text = "Camera Access System", color = CyanAccent, fontSize = 12.sp, letterSpacing = 0.5.sp)
                 }
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.size(48.dp).clip(CircleShape).background(Color(0xFF1A1030)).border(1.dp, PurpleRing.copy(alpha = 0.5f), CircleShape).clickable { }) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.size(48.dp).clip(CircleShape).background(Color(0xFF1A1030)).border(1.dp, PurpleRing.copy(alpha = 0.5f), CircleShape)) {
                     Icon(imageVector = Icons.Default.Fingerprint, contentDescription = "Biometric", tint = PurpleRing, modifier = Modifier.size(24.dp))
                 }
             }
@@ -195,7 +195,7 @@ fun FaceGateScreen(
                         }
                     }
                     isHooked -> {
-                        Button(onClick = { hookedState = false }, modifier = Modifier.fillMaxWidth().height(72.dp), shape = RoundedCornerShape(18.dp), colors = ButtonDefaults.buttonColors(containerColor = GreenActive)) {
+                        Button(onClick = onHookSuccess, modifier = Modifier.fillMaxWidth().height(72.dp), shape = RoundedCornerShape(18.dp), colors = ButtonDefaults.buttonColors(containerColor = GreenActive)) {
                             Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(22.dp), tint = Color.Black)
                             Spacer(modifier = Modifier.width(10.dp))
                             Column {

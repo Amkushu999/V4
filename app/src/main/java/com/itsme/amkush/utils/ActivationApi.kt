@@ -70,8 +70,12 @@ object ActivationApi {
         conn.setRequestProperty("X-APK-Signature", signatureHash)
         
         conn.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
-        val stream = if (conn.responseCode >= 400) conn.errorStream else conn.inputStream
-        return BufferedReader(InputStreamReader(stream, "UTF-8")).use { it.readText() }
+        return try {
+            val stream = if (conn.responseCode >= 400) conn.errorStream else conn.inputStream
+            BufferedReader(InputStreamReader(stream, "UTF-8")).use { it.readText() }
+        } finally {
+            conn.disconnect()
+        }
     }
 
     fun validateKey(context: Context, key: String, deviceId: String): JSONObject {

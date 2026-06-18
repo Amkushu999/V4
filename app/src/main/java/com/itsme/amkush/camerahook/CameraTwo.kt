@@ -163,6 +163,9 @@ object CameraTwo {
         try {
             canvas = surface.lockCanvas(null)
             if (canvas != null) {
+                // Refresh transform state from shared prefs so that zoom/pan changes
+                // made in TransformControlsScreen are reflected within ~250ms.
+                MediaTransformState.refreshFromPrefsIfStale()
                 val scale = MediaTransformState.scale
                 val offsetX = MediaTransformState.offsetX
                 val offsetY = MediaTransformState.offsetY
