@@ -1,8 +1,8 @@
 package com.itsme.amkush.hooks.bypass
 
+import android.os.Build
 import com.itsme.amkush.utils.SafeHooker
 import de.robv.android.xposed.XC_MethodHook
-import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 
 object AntiXposedDetectionHook {
@@ -55,14 +55,31 @@ object AntiXposedDetectionHook {
             "com.github.xposed"
         )
 
-        SafeHooker.hookMethod(lpparam, "android.app.ApplicationPackageManager", "getPackageInfo", String::class.java, Int::class.javaPrimitiveType!!, callback = object : XC_MethodHook() {
+        val hook = object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
                 val packageName = param.args[0] as? String ?: return
                 if (xposedPackages.any { packageName.contains(it) }) {
                     param.throwable = android.content.pm.PackageManager.NameNotFoundException("Package not found")
                 }
             }
-        })
+        }
+
+        // Legacy API (< Android 13)
+        SafeHooker.hookMethod(
+            lpparam, "android.app.ApplicationPackageManager", "getPackageInfo",
+            String::class.java, Int::class.javaPrimitiveType!!, callback = hook
+        )
+
+        // FIX #23: Also hook the Android 13+ PackageInfoFlags overload. Previously only
+        // the int-flags overload was hooked, so apps targeting API 33+ that call
+        // getPackageInfo(String, PackageInfoFlags) bypassed the Xposed package hiding.
+        if (Build.VERSION.SDK_INT >= 33) {
+            SafeHooker.hookMethod(
+                lpparam, "android.app.ApplicationPackageManager", "getPackageInfo",
+                String::class.java, android.content.pm.PackageManager.PackageInfoFlags::class.java,
+                callback = hook
+            )
+        }
     }
 
     private fun hideXposedInClassLoader(lpparam: XC_LoadPackage.LoadPackageParam) {

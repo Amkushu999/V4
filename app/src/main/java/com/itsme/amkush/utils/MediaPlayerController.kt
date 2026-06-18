@@ -1,6 +1,5 @@
 package com.itsme.amkush.utils
 
-import android.content.Context
 import android.util.Log
 import android.view.SurfaceHolder
 import cn.dianbobo.dbb.util.HLog
@@ -8,51 +7,60 @@ import com.itsme.amkush.config.Config
 import com.itsme.amkush.interfaces.IVideoPlayer
 import tv.danmaku.ijk.media.player.IjkMediaPlayer
 
-class MediaPlayerController(private val context: Context) : IVideoPlayer {
+class MediaPlayerController(private val context: android.content.Context) : IVideoPlayer {
     private var mediaPlayer: IjkMediaPlayer? = null
     private var retryCount = 0
-    
+
     override fun playVideo(holder: SurfaceHolder, videoPath: String) {
-        release() 
+        release()
         mediaPlayer = IjkMediaPlayer().apply {
             try {
-                setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 0)
-                setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-all-videos", 0)
-                setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "max-fps", 30)
-                setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1)
-                setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 1)
+                setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 0L)
+                setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-all-videos", 0L)
+                setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "max-fps", 30L)
+                setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1L)
+                setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 1L)
 
-                dataSource = videoPath
-                setDisplay(holder)
-                prepareAsync()
-                
+                // FIX #8 (CRITICAL): Set ALL listeners BEFORE prepareAsync(). Previously
+                // prepareAsync() was called before setOnPreparedListener, creating a race
+                // condition where a fast prepare would fire before the listener was registered,
+                // causing the video to silently never start playing.
                 setOnPreparedListener { start() }
                 setOnErrorListener { _, what, extra ->
                     ErrorHandler.handleMediaPlayerError("VideoPlayer", what, extra)
                     true
                 }
+
+                dataSource = videoPath
+                setDisplay(holder)
+                prepareAsync()
             } catch (e: Exception) {
                 ErrorHandler.handleError("VideoPlayer", e, true, context)
             }
         }
     }
-    
+
     override fun playRTMPStream(holder: SurfaceHolder, rtmpUrl: String) {
-        release() 
+        release()
         mediaPlayer = IjkMediaPlayer().apply {
             try {
-                setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 0)
-                setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-auto-rotate", 1)
-                setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-handle-resolution-change", 1)
-                setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "dns_cache_clear", 1)
-                setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 0)
-                setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec_mpeg4", 1)
+                setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 0L)
+                setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-auto-rotate", 1L)
+                setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-handle-resolution-change", 1L)
+                setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "dns_cache_clear", 1L)
+                setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 0L)
+                setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec_mpeg4", 1L)
                 setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "analyzemaxduration", Config.DEFAULT_ANALYZE_DURATION)
                 setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "probesize", Config.DEFAULT_PROBE_SIZE)
                 setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "flush_packets", 1L)
                 setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "packet-buffering", 1L)
                 setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1L)
-                
+
+                // FIX #9 (CRITICAL): Listeners before prepareAsync() — same race condition fix.
+                setOnPreparedListener {
+                    HLog.d("Stream", "Live stream preview received successfully")
+                    start()
+                }
                 setOnErrorListener { _, what, extra ->
                     ErrorHandler.handleStreamError(context, what)
                     true
@@ -61,15 +69,10 @@ class MediaPlayerController(private val context: Context) : IVideoPlayer {
                     Log.i("IjkMediaPlayer", "Info received. What: $what, Extra: $extra")
                     true
                 }
-                
+
                 dataSource = rtmpUrl
                 setDisplay(holder)
                 prepareAsync()
-                
-                setOnPreparedListener {
-                    HLog.d("Stream", "Live stream preview received successfully")
-                    start()
-                }
             } catch (e: Exception) {
                 if (retryCount < Config.MAX_RETRY_COUNT) {
                     retryCount++
@@ -80,11 +83,10 @@ class MediaPlayerController(private val context: Context) : IVideoPlayer {
             }
         }
     }
-    
+
     override fun release() {
         mediaPlayer?.let { player ->
             try {
-                // 🛡️ FIXED: Use isPlaying() instead of the fake isPlayable() stub
                 if (player.isPlaying) player.stop()
                 player.release()
             } catch (e: Exception) {
@@ -94,15 +96,14 @@ class MediaPlayerController(private val context: Context) : IVideoPlayer {
         mediaPlayer = null
         retryCount = 0
     }
-    
+
     override fun isPlaying(): Boolean {
-        // 🛡️ FIXED: Use the actual native isPlaying() method
         return try {
             mediaPlayer?.isPlaying ?: false
         } catch (e: Exception) {
             false
         }
     }
-    
+
     fun getPlayer(): IjkMediaPlayer? = mediaPlayer
 }

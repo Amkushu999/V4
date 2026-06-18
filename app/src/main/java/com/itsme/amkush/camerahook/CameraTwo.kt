@@ -17,27 +17,33 @@ import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 
 object CameraTwo {
-    
+
     private var c2_builder: CaptureRequest.Builder? = null
     private var original_preview_Surface: Surface? = null
     private var c2_virtual_surface: Surface? = null
     private var c2_state_callback: CameraDevice.StateCallback? = null
-    
+
+    // FIX #11: Bitmap cache — decoding from disk on every CaptureRequest.build() call
+    // caused severe performance issues (potential ANR/OOM on the camera capture thread).
+    // Now the bitmap is decoded only once per unique URI and reused on subsequent calls.
+    private var cachedBitmap: Bitmap? = null
+    private var lastCachedUri: String? = null
+
     fun initHooks(lpparam: XC_LoadPackage.LoadPackageParam) {
         hookCameraManager(lpparam)
     }
-    
+
     private fun hookCameraManager(lpparam: XC_LoadPackage.LoadPackageParam) {
         try {
             XposedHelpers.findAndHookMethod(
                 "android.hardware.camera2.CameraManager", lpparam.classLoader, "openCamera",
-                String::class.java, CameraDevice.StateCallback::class.java, Handler::class.java, 
+                String::class.java, CameraDevice.StateCallback::class.java, Handler::class.java,
                 object : XC_MethodHook() {
                     override fun afterHookedMethod(param: MethodHookParam) {
                         try {
                             if (param.args[1] == null) return
                             if (param.args[1] == c2_state_callback) return
-                            
+
                             c2_state_callback = param.args[1] as CameraDevice.StateCallback
                             val c2_state_callback_class = param.args[1]?.javaClass
                             process_camera2_init(c2_state_callback_class as Class<Any>?, lpparam)
@@ -50,14 +56,14 @@ object CameraTwo {
             cn.dianbobo.dbb.util.HLog.e("CameraTwo", "hookCameraManager failed: ${e.message}")
         }
     }
-    
+
     private fun process_camera2_init(c2StateCallbackClass: Class<Any>?, lpparam: XC_LoadPackage.LoadPackageParam) {
         if (c2StateCallbackClass == null) return
         try {
             XposedHelpers.findAndHookMethod(c2StateCallbackClass, "onOpened", CameraDevice::class.java, object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) { original_preview_Surface = null }
             })
-            
+
             XposedHelpers.findAndHookMethod("android.hardware.camera2.CaptureRequest.Builder", lpparam.classLoader, "addTarget", Surface::class.java, object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
                     if (param.args[0] != null) {
@@ -71,7 +77,7 @@ object CameraTwo {
                     }
                 }
             })
-            
+
             XposedHelpers.findAndHookMethod("android.hardware.camera2.CaptureRequest.Builder", lpparam.classLoader, "build", object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
                     if (param.thisObject != null && param.thisObject != c2_builder) {
@@ -80,7 +86,7 @@ object CameraTwo {
                     }
                 }
             })
-            
+
             XposedHelpers.findAndHookMethod(c2StateCallbackClass, "onDisconnected", CameraDevice::class.java, object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) { original_preview_Surface = null }
             })
@@ -88,25 +94,25 @@ object CameraTwo {
             cn.dianbobo.dbb.util.HLog.e("CameraTwo", "process_camera2_init failed: ${e.message}")
         }
     }
-    
+
     private fun process_camera_play() {
         val surface = original_preview_Surface ?: return
-        
+
         if (MainHook.imageUri != null) {
             injectStaticImageWithTransform(surface)
             return
         }
-        
+
         val videoStatus = MainHook.videoStatus
         val ijkPlayer = MainHook.ijkMediaPlayer
-        
+
         if (ijkPlayer == null || !ijkPlayer.isPlayable) {
             if (videoStatus?.isLiveStreamingEnabled == true) MainHook.initRTMPStream()
             else if (videoStatus?.isVideoEnable == true) MainHook.initIjkPlayer()
         }
-        
+
         MainHook.TheOnlyPlayer = MainHook.ijkMediaPlayer
-        
+
         MainHook.ijkMediaPlayer?.let { player ->
             val volume = if (videoStatus?.isVideoEnable == true && videoStatus.volume) 1F else 0F
             player.setVolume(volume, volume)
@@ -131,33 +137,45 @@ object CameraTwo {
         val imageUriStr = MainHook.imageUri ?: return
         val ctx = MainHook.context ?: return
 
-        val bitmap = try {
-            val inputStream = ctx.contentResolver.openInputStream(Uri.parse(imageUriStr))
-            val bmp = BitmapFactory.decodeStream(inputStream)
-            inputStream?.close()
-            bmp
-        } catch (e: Exception) {
-            cn.dianbobo.dbb.util.HLog.e("CameraTwo", "Image decode error: ${e.message}")
-            null
-        }
+        // FIX #11 (continued): Use the cached bitmap if the URI hasn't changed.
+        // Previously this decoded a full bitmap from disk on EVERY CaptureRequest.build()
+        // invocation, which fires multiple times per second — causing I/O saturation on
+        // the camera capture thread and potential ANR in the target app.
+        val bitmap: Bitmap = if (imageUriStr == lastCachedUri && cachedBitmap != null && cachedBitmap!!.isRecycled.not()) {
+            cachedBitmap!!
+        } else {
+            val decoded = try {
+                ctx.contentResolver.openInputStream(Uri.parse(imageUriStr))?.use { stream ->
+                    BitmapFactory.decodeStream(stream)
+                }
+            } catch (e: Exception) {
+                cn.dianbobo.dbb.util.HLog.e("CameraTwo", "Image decode error: ${e.message}")
+                null
+            } ?: return
 
-        if (bitmap == null) return
+            cachedBitmap?.recycle()
+            cachedBitmap = decoded
+            lastCachedUri = imageUriStr
+            decoded
+        }
 
         var canvas: Canvas? = null
         try {
             canvas = surface.lockCanvas(null)
             if (canvas != null) {
-                val matrix = Matrix()
                 val scale = MediaTransformState.scale
                 val offsetX = MediaTransformState.offsetX
                 val offsetY = MediaTransformState.offsetY
-
-                matrix.postScale(scale, scale)
                 val centerX = canvas.width / 2f
                 val centerY = canvas.height / 2f
-                matrix.postTranslate(-centerX, -centerY)
+
+                // FIX #12: Corrected matrix transform order for center-anchored scale+pan.
+                // postScale(sx, sy, px, py) applies scale around pivot (px, py) in one step,
+                // avoiding the manual translate-scale-translate sequence that had an
+                // off-by-one pivot error when combined with the pan offset.
+                val matrix = Matrix()
+                matrix.postScale(scale, scale, centerX, centerY)
                 matrix.postTranslate(offsetX, offsetY)
-                matrix.postTranslate(centerX, centerY)
 
                 canvas.drawBitmap(bitmap, matrix, null)
             }
@@ -167,14 +185,17 @@ object CameraTwo {
             if (canvas != null) {
                 surface.unlockCanvasAndPost(canvas)
             }
-            bitmap.recycle()
+            // Do NOT recycle here — bitmap is cached for reuse
         }
     }
-    
+
     fun reset() {
         c2_builder = null
         original_preview_Surface = null
         c2_virtual_surface = null
         c2_state_callback = null
+        cachedBitmap?.recycle()
+        cachedBitmap = null
+        lastCachedUri = null
     }
 }

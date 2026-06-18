@@ -91,10 +91,13 @@ object CameraOne {
                                                 actualHeight != lastPreviewHeight
                                             
                                             if (needsDecode) {
-                                                val inputStream = ctx.contentResolver.openInputStream(Uri.parse(imageUri))
-                                                val originalBitmap = BitmapFactory.decodeStream(inputStream)
-                                                inputStream?.close()
-                                                
+                                                // FIX #25: Use .use{} to guarantee the InputStream
+                                                // is always closed even if decodeStream throws.
+                                                // Previously close() was only on the happy path.
+                                                val originalBitmap = ctx.contentResolver
+                                                    .openInputStream(Uri.parse(imageUri))
+                                                    ?.use { stream -> BitmapFactory.decodeStream(stream) }
+
                                                 if (originalBitmap != null) {
                                                     val scaledBitmap = Bitmap.createScaledBitmap(
                                                         originalBitmap, actualWidth, actualHeight, true

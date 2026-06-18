@@ -7,7 +7,7 @@ import cn.dianbobo.dbb.util.HLog
 import com.itsme.amkush.config.Config
 
 /**
- * Centralized error handling utility - Refactored to be safe for non-Xposed environments
+ * Centralized error handling utility — safe for non-Xposed environments.
  */
 object ErrorHandler {
 
@@ -35,31 +35,28 @@ object ErrorHandler {
      */
     fun handleXposedError(tag: String, error: Throwable) {
         val message = "$tag Error: ${error.message}"
-        
         try {
-            // Use reflection to check for XposedBridge without causing a class-loading crash
             val xposedBridgeClass = Class.forName(XPOSED_BRIDGE_CLASS)
             val logMethod = xposedBridgeClass.getMethod("log", String::class.java)
             logMethod.invoke(null, message)
 
             if (Config.DEBUG_MODE) {
-                // Also log the stack trace object if needed
                 val logThrowableMethod = xposedBridgeClass.getMethod("log", Throwable::class.java)
                 logThrowableMethod.invoke(null, error)
             }
         } catch (e: Throwable) {
-            // Xposed is not active in this process; use standard logging
             Log.e(tag, "Xposed not active, logging to logcat: $message", error)
         }
     }
 
     fun handleMediaPlayerError(tag: String, what: Int, extra: Int): Boolean {
         HLog.d(tag, "MediaPlayer Error - What: $what, Extra: $extra")
-        return true // Error handled
+        return true
     }
 
     fun handleStreamError(context: Context?, what: Int) {
-        val message = "直播接收失败 $what"
+        // FIX #24: Replaced Chinese toast text "直播接收失败" with English.
+        val message = "Stream receive failed: $what"
         HLog.d("Stream", message)
 
         context?.let {
