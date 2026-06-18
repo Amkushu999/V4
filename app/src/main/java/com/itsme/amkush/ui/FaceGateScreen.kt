@@ -1,8 +1,11 @@
 package com.itsme.amkush.ui
 
+import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
+import android.net.Uri
+import android.os.Process
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
@@ -67,9 +70,10 @@ fun FaceGateScreen(
     var hookingState by remember { mutableStateOf(false) }
     var hookedState by remember { mutableStateOf(false) }
 
+    // Adjusted rotation baseline timing upwards from 3000ms to 12000ms for a more premium, slower speed
     val fgRotation by rememberInfiniteTransition(label = "fgSpin").animateFloat(
         initialValue = 0f, targetValue = 360f,
-        animationSpec = infiniteRepeatable(animation = tween(durationMillis = 3000, easing = LinearEasing), repeatMode = RepeatMode.Restart),
+        animationSpec = infiniteRepeatable(animation = tween(durationMillis = 12000, easing = LinearEasing), repeatMode = RepeatMode.Restart),
         label = "fgRot"
     )
 
@@ -134,13 +138,38 @@ fun FaceGateScreen(
                 }
             }
 
-            OutlinedButton(onClick = { }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(14.dp), border = BorderStroke(1.dp, CyanAccent.copy(alpha = 0.4f)), colors = ButtonDefaults.outlinedButtonColors(contentColor = CyanAccent)) {
+            OutlinedButton(
+                onClick = { 
+                    val pm = context.packageManager
+                    val intent = pm.getLaunchIntentForPackage(context.packageName)
+                    if (intent != null) {
+                        val restartIntent = Intent.makeRestartActivityTask(intent.component)
+                        context.startActivity(restartIntent)
+                        Process.killProcess(Process.myPid())
+                    }
+                }, 
+                modifier = Modifier.fillMaxWidth().height(52.dp), 
+                shape = RoundedCornerShape(14.dp), 
+                border = BorderStroke(1.dp, CyanAccent.copy(alpha = 0.4f)), 
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = CyanAccent)
+            ) {
                 Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Restart System", fontSize = 14.sp, letterSpacing = 0.5.sp)
             }
 
-            OutlinedButton(onClick = { }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(14.dp), border = BorderStroke(1.dp, CyanAccent.copy(alpha = 0.4f)), colors = ButtonDefaults.outlinedButtonColors(contentColor = CyanAccent)) {
+            OutlinedButton(
+                onClick = { 
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/facegateofficial"))
+                        context.startActivity(intent)
+                    } catch (_: Exception) {}
+                }, 
+                modifier = Modifier.fillMaxWidth().height(52.dp), 
+                shape = RoundedCornerShape(14.dp), 
+                border = BorderStroke(1.dp, CyanAccent.copy(alpha = 0.4f)), 
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = CyanAccent)
+            ) {
                 Icon(Icons.Default.Send, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Support & Updates", fontSize = 14.sp, letterSpacing = 0.5.sp)
@@ -218,7 +247,7 @@ fun FaceGateScreen(
                         Button(onClick = { showAppPicker = true }, modifier = Modifier.fillMaxWidth().height(72.dp), shape = RoundedCornerShape(18.dp), colors = ButtonDefaults.buttonColors(containerColor = CardDarker), border = BorderStroke(1.dp, BorderColor)) {
                             Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(22.dp), tint = TextSecondary)
                             Spacer(modifier = Modifier.width(10.dp))
-                            Text("SELECT TARGET", fontWeight = FontWeight.Bold, fontSize = 15.sp, letterSpacing = 1.sp, color = TextSecondary)
+                            Text("SELECT TARGET")
                         }
                     }
                 }
@@ -255,7 +284,10 @@ fun AppPickerSheet(onDismiss: () -> Unit, onAppSelected: (AppInfo) -> Unit) {
         }
     }
 
-    val filtered = remember(apps, searchQuery) { if (searchQuery.isBlank()) apps else apps.filter { it.label.contains(searchQuery, ignoreCase = true) } }
+    val filtered = remember(apps, searchQuery) { 
+        if (searchQuery.isBlank()) apps 
+        else apps.filter { it.label.contains(searchQuery, ignoreCase = true) } 
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.6f)).clickable(onClick = onDismiss), contentAlignment = Alignment.BottomCenter) {
         Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.78f).clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)).background(Color(0xFF12141C)).clickable(enabled = false) {}) {
@@ -263,7 +295,28 @@ fun AppPickerSheet(onDismiss: () -> Unit, onAppSelected: (AppInfo) -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(text = "SELECT TARGET APP", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp, letterSpacing = 2.sp, modifier = Modifier.padding(horizontal = 20.dp))
             Spacer(modifier = Modifier.height(14.dp))
-            OutlinedTextField(value = searchQuery, onValueChange = { searchQuery = it }, placeholder = { Text("Search apps...", color = TextSecondary, fontSize = 14.sp) }, leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = CyanAccent) }, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), shape = RoundedCornerShape(14.dp), colors = TextFieldDefaults.outlinedTextFieldColors(textColor = TextPrimary, cursorColor = CyanAccent, focusedBorderColor = CyanAccent.copy(alpha = 0.6f), unfocusedBorderColor = BorderColor, containerColor = CardDarker), singleLine = true, keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search))
+            
+            OutlinedTextField(
+                value = searchQuery, 
+                onValueChange = { searchQuery = it }, 
+                placeholder = { Text("Search apps...", color = TextSecondary, fontSize = 14.sp) }, 
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = CyanAccent) }, 
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), 
+                shape = RoundedCornerShape(14.dp), 
+                // Migrated layout colors mapping logic to standard non-deprecated M3 specs to fix recomposition listening bugs
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = TextPrimary,
+                    unfocusedTextColor = TextPrimary,
+                    cursorColor = CyanAccent,
+                    focusedBorderColor = CyanAccent.copy(alpha = 0.6f),
+                    unfocusedBorderColor = BorderColor,
+                    focusedContainerColor = CardDarker,
+                    unfocusedContainerColor = CardDarker
+                ), 
+                singleLine = true, 
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)
+            )
+            
             Spacer(modifier = Modifier.height(6.dp))
             if (!isLoading) Text(text = "${filtered.size} apps found", color = TextSecondary, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp))
             if (isLoading) Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = CyanAccent, strokeWidth = 2.dp, modifier = Modifier.size(32.dp)) } 
